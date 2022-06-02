@@ -26,23 +26,24 @@ class UserController {
         const { name, email, password, old_password, avatar } = req.body;
         const { id } = req.params;
 
-        const idHadUser = await knex("users").where({ id }).first();
-        if (idHadUser.length === 0) {
+        const user = await knex("users").where({ id }).first();
+        if (user.length === 0) {
             throw new AppError('Usuário não existe')
         }
 
-        const emailExists = await knex("users").where({ email }).first();
-
-        console.log(emailExists)
-        if (emailExists.length > 0 && emailExists.id !== idHadUser.id) {
-            console.log(emailExists.id);
-            console.log(idHadUser.id);
-            throw new AppError('E-mail informado já está em uso');
+        if(email){            
+            const emailExists = await knex("users").where({email}).first();
+    
+            if (emailExists && emailExists.id !== user.id) {
+                console.log(emailExists);
+                console.log("nao passou");
+                throw new AppError('E-mail informado já está em uso');
+            }
         }
 
+        user.name = name ?? user.name;
 
-        console.log(emailExists[0].id);
-        console.log(idHadUser.id);
+        
         res.json();
     }
 }
