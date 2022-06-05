@@ -8,5 +8,6 @@ const routes = Router();
 
 routes.use('/users', userRoutes);
 routes.use('/movies', moviesNotesRoutes);
+routes.use('/tags', moviesTagsRoutes);
 
 module.exports = routes;

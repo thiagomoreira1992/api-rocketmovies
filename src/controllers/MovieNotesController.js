@@ -56,6 +56,9 @@ class MovieNotesController {
 
     async index(req, res) {
         const { user_id, title, tags } = req.query;
+        console.log(user_id, " - ", title, " - ", tags);
+
+        if(!user_id || "" || undefined) throw new AppError("O usuário deve ser informado!")
 
         let movieNotes;
 
@@ -65,22 +68,32 @@ class MovieNotesController {
             movieNotes = await knex("movie_tags")
                 .select([
                     "movie_notes.id",
-                    "movi_notes.title",
+                    "movie_notes.title",
                     "movie_notes.user_id"
                 ])
                 .where("movie_notes.user_id", user_id)
                 .whereLike("movie_notes.title", `%${title}%`)
                 .whereIn("name", movieTags)
-                .innerJoin("movie_notes", "movie_notes.id", "movie_tags.notes_id")
+                .innerJoin("movie_notes", "movie_notes.id", "movie_tags.note_id")
                 .orderBy("movie_notes.title");
         }else{
             movieNotes = await knex("movie_notes")
                 .where({user_id})
-                .where("title", `%${title}%`)
+                .whereLike("title", `%${title}%`)
                 .orderBy("title");
         }
 
         const userTags = await knex("movie_tags").where({user_id});
+        const moviesWithTags = movieNotes.map(movie => {
+            const moviesTags = userTags.filter(tag => tag.note_id === movie.id) 
+        
+            return{
+                ...movie,
+                tags: moviesTags
+            }
+        })
+        console.log(movieNotes)
+        return res.json(moviesWithTags);    
         
     }
 }
